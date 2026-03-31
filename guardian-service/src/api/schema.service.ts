@@ -575,8 +575,8 @@ export async function schemaAPI(logger: PinoLogger): Promise<void> {
                 ): Promise<{ alias: string, field: string } | null> => {
                     const parts = fieldPath.split('.');
                     if (parts.length === 1) {
-                        const alias = await resolveSchemaAlias(schemaIri, addMissing);
-                        return alias ? { alias, field: sanitizeFieldName(parts[0]) } : null;
+                        const schemaAlias = await resolveSchemaAlias(schemaIri, addMissing);
+                        return schemaAlias ? { alias: schemaAlias, field: sanitizeFieldName(parts[0]) } : null;
                     }
                     let currentIri = schemaIri;
                     for (let i = 0; i < parts.length - 1; i++) {
@@ -665,8 +665,8 @@ export async function schemaAPI(logger: PinoLogger): Promise<void> {
                                 changed = false;
                                 for (const f of allFormulas) {
                                     if (relevantFormulaUuids.has(f.uuid)) {
-                                        const items = f.config?.formulas || [];
-                                        for (const item of items) {
+                                        const formulaItems = f.config?.formulas || [];
+                                        for (const item of formulaItems) {
                                             if (item.link && item.link.type === 'formula' && !relevantFormulaUuids.has(item.link.entityId)) {
                                                 const dep = formulaByUuid.get(item.link.entityId);
                                                 if (dep) {
@@ -721,7 +721,7 @@ export async function schemaAPI(logger: PinoLogger): Promise<void> {
                                 const compAlias = sanitizeAlias(`${formula.name}_${item.name}`);
                                 const stereotype = item.type || 'unknown';
                                 const desc = (item.description || '').replace(/[\r\n]+/g, ' ').trim();
-                                const val = item.value != null && item.value !== '' ? String(item.value).replace(/[\r\n]+/g, ' ').trim() : '';
+                                const val = item.value !== null && item.value !== undefined && item.value !== '' ? String(item.value).replace(/[\r\n]+/g, ' ').trim() : '';
 
                                 packageLines.push(`  class "${item.name}" as ${compAlias} <<${stereotype}>> {`);
                                 packageLines.push(`    description : ${desc || 'Empty'}`);
